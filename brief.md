@@ -138,29 +138,29 @@ graph LR
 graph TD
     %% Client Layer
     subgraph Client Layer
-        U[Users (کاربران)] --> F[Frontend (Next.js)]
+        U["Users (کاربران)"] --> F["Frontend (Next.js)"]
     end
 
     %% Edge & Gateway Layer
     subgraph Edge & Gateway Layer
-        F --> E[Edge (Cloudflare)]
-        E --> G[API Gateway (Kong)]
+        F --> E["Edge (Cloudflare)"]
+        E --> G["API Gateway (Kong)"]
     end
 
     %% Application Layer
     subgraph Application Layer
-        G --> S1[Backend Core (Go)]
-        G --> S2[AI Service (Python)]
-        G --> S3[Real-time Service (Go)]
+        G --> S1["Backend Core (Go)"]
+        G --> S2["AI Service (Python)"]
+        G --> S3["Real-time Service (Go)"]
     end
 
     %% Data & Event Layer
     subgraph Data & Event Layer
-        S1 --> DB1[PostgreSQL]
-        S1 --> DB2[MongoDB]
-        S2 --> DB3[Vector DB]
-        S3 --> DB4[Redis]
-        S1 -- Events --> K[Event Bus]
+        S1 --> DB1["PostgreSQL"]
+        S1 --> DB2["MongoDB"]
+        S2 --> DB3["Vector DB"]
+        S3 --> DB4["Redis"]
+        S1 -- Events --> K["Event Bus"]
         K -- Events --> S2
         K -- Events --> S3
     end
@@ -230,10 +230,10 @@ graph TD
 ```mermaid
 graph TD
     subgraph "استراتژی‌های رندرینگ"
-        A[🏠 صفحات عمومی (Marketing)] -- SSG --> P1(عملکرد بهینه و SEO)
-        B[📚 مقالات و محتوا (Content)] -- ISR --> P2(سرعت بالا + به‌روز بودن)
-        C[👤 داشبورد و پروفایل (User-specific)] -- SSR --> P3(داده‌های زنده و شخصی‌سازی شده)
-        D[💬 انجمن و چت (Interactive)] -- CSR --> P4(تجربه روان شبه-اپلیکیشن)
+        A["🏠 صفحات عمومی (Marketing)"] -- SSG --> P1["عملکرد بهینه و SEO"]
+        B["📚 مقالات و محتوا (Content)"] -- ISR --> P2["سرعت بالا + به‌روز بودن"]
+        C["👤 داشبورد و پروفایل (User-specific)"] -- SSR --> P3["داده‌های زنده و شخصی‌سازی شده"]
+        D["💬 انجمن و چت (Interactive)"] -- CSR --> P4["تجربه روان شبه-اپلیکیشن"]
     end
 
     style A fill:#cde
@@ -261,13 +261,14 @@ graph TD
 graph TD
     subgraph "صفحه مقاله"
         direction LR
-        Server[HTML استاتیک (Server Component)]
-        Island1[🏝️ کامپوننت نظرات ('use client')]
-        Island2[🏝️ دکمه بوکمارک ('use client')]
+        Server["HTML استاتیک (Server Component)"]
+        Island1["🏝️ کامپوننت نظرات ('use client')"]
+        Island2["🏝️ دکمه بوکمارک ('use client')"]
 
         Server --> Island1
         Server --> Island2
     end
+    
     style Server fill:#f2f2f2
     style Island1 fill:#ccf
     style Island2 fill:#ccf
@@ -338,33 +339,30 @@ apps/platform/
 
 هر سرویس در Backend ما (مانند سرویس اصلی Go) از چهار لایه اصلی تشکیل شده است. قانون اصلی این است که **وابستگی‌ها همیشه به سمت داخل هستند**.
 
-<br>
 
 ```mermaid
-graph TD
-    subgraph "لایه بیرونی"
-        I(🔌 Infrastructure)
-    end
-    subgraph "لایه میانی"
-        P(🌐 Presentation)
-        A(📋 Application)
-    end
-    subgraph "لایه درونی (هسته)"
-        D(🏛️ Domain)
-    end
-
-    P --> A
-    A --> D
-    I ..> A
-    A ..> I
-
-    style I fill:#f9f
-    style P fill:#cde
-    style A fill:#fde
-    style D fill:#dfd
+graph TD;
+    subgraph "لایه بیرونی";
+        I("🔌 Infrastructure");
+    end;
+    subgraph "لایه میانی";
+        P("🌐 Presentation");
+        A("📋 Application");
+    end;
+    subgraph "لایه درونی (هسته)";
+        D("🏛️ Domain");
+    end;
+    P --> A;
+    A --> D;
+    I ..> A;
+    A ..> I;
+    style I fill:#f9f;
+    style P fill:#cde;
+    style A fill:#fde;
+    style D fill:#dfd;
 ```
 
-<br>
+
 
 | لایه | مسئولیت | مثال‌ها |
 | :--- | :--- | :--- |
@@ -546,53 +544,59 @@ graph TD
 
 ```mermaid
 graph TD
+    %% Global Services
     subgraph "Global Services"
-        R53[Route 53 (DNS)] --> CF[CloudFront (CDN)]
+        U("Users") --> R53("Route 53 (DNS)")
+        R53 --> CF("CloudFront (CDN)")
     end
 
+    %% AWS Region
     subgraph "AWS Region (e.g., us-east-1)"
-        VPC(VPC)
-        subgraph VPC
+        
+        subgraph "VPC"
+            direction LR
+            
             subgraph "Public Subnets"
-                ALB[Application Load Balancer]
+                ALB("Application Load Balancer")
             end
+
             subgraph "Private Subnets"
-                ECS[ECS Fargate Cluster]
-                subgraph ECS
-                    S1[Backend (Go)]
-                    S2[AI Service (Python)]
-                    S3[Worker (Node.js)]
+                subgraph "ECS Fargate Cluster"
+                    S1("Backend (Go)")
+                    S2("AI Service (Python)")
+                    S3("Worker (Node.js)")
                 end
                 
-                DBs(Database Services)
-                subgraph DBs
-                    RDS[(PostgreSQL)]
-                    ElastiCache[(Redis)]
+                subgraph "Database Services"
+                    RDS("PostgreSQL (RDS)")
+                    ElastiCache("Redis (ElastiCache)")
                 end
-                
-                S1 --> RDS
-                S1 --> ElastiCache
-                S2 --> Pinecone
-                S3 --> ElastiCache
+
+                %% تعریف نود پاین‌کون به عنوان یک سرویس خارجی یا داخلی
+                Pinecone["Pinecone (Vector DB)"]
             end
             
+            %% Internal VPC Traffic
             ALB --> S1
             ALB --> S2
             ALB --> S3
+            
+            S1 --> RDS
+            S1 --> ElastiCache
+            S2 --> Pinecone
+            S3 --> ElastiCache
         end
         
-        S3Bucket[S3 Bucket]
-        ECR[ECR (Container Registry)]
+        %% Other Regional Services
+        S3Bucket("S3 Bucket")
+        ECR("ECR (Container Registry)")
         
+        %% Connections to other services
         S1 --> S3Bucket
     end
     
+    %% Global to Regional Traffic
     CF --> ALB
-    U(Users) --> R53
-    
-    style VPC fill:#f2f2f2
-    style ECS fill:#cde
-    style DBs fill:#fde
 ```
 
 <br>
