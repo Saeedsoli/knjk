@@ -1,0 +1,56 @@
+name: Build Diagram Document
+
+on:
+  push:
+    paths:
+      - '**.md' # این ورک‌فلو فقط زمانی اجرا می‌شود که یک فایل مارک‌داون تغییر کند
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # اجرا روی یک ماشین مجازی لینوکس
+    steps:
+      # 1. کدهای شما را به ماشین مجازی می‌آورد
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # 2. ابزار تبدیل دیاگرام را نصب می‌کند
+      - name: Install Mermaid CLI
+        run: npm install -g @mermaid-js/mermaid-cli
+
+      # 3. ابزار تبدیل مارک‌داون به PDF را نصب می‌کند (Pandoc)
+      - name: Install Pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc texlive-xetex
+
+      # 4. اسکریپت اصلی برای تبدیل
+      - name: Convert Mermaid to Images and Generate PDF
+        run: |
+          # پیدا کردن تمام فایل‌های مارک‌داون تغییر کرده
+          for file in $(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep .md$); do
+            echo "Processing $file..."
+            # ساخت یک کپی برای کار روی آن
+            cp $file temp_file.md
+            
+            # پیدا کردن بلوک‌های mermaid و تبدیل آنها به تصویر
+            i=0
+            grep -n '```mermaid' temp_file.md | cut -d: -f1 | while read -r line_num; do
+              # استخراج کد دیاگرام
+              awk "NR>$line_num && /^\`\`\`$/{exit} 1" temp_file.md | sed -n '/```/d;p' > diagram.mmd
+              
+              # تبدیل به تصویر
+              mmdc -i diagram.mmd -o "diagram-$i.png"
+              
+              # جایگزین کردن کد با لینک تصویر در فایل
+              sed -i "s|\`\`\`mermaid.*\`\`\`|![$file diagram $i](diagram-$i.png)|" temp_file.md
+              i=$((i+1))
+            done
+
+            # تبدیل فایل مارک‌داون نهایی به PDF
+            pandoc temp_file.md -o "${file%.md}.pdf" --pdf-engine=xelatex
+          done
+
+      # 5. آپلود فایل PDF نهایی به عنوان یک "آرتیفکت"
+      - name: Upload PDF Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Generated-Documents
+          path: '*.pdf'
