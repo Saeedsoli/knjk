@@ -136,38 +136,43 @@ graph LR
 
 ```mermaid
 graph TD
+    %% Client Layer
     subgraph Client Layer
-        U"کاربران" --> F{"Frontend Next.js"}
+        U[Users (کاربران)] --> F[Frontend (Next.js)]
     end
 
+    %% Edge & Gateway Layer
     subgraph Edge & Gateway Layer
         F --> E[Edge (Cloudflare)]
         E --> G[API Gateway (Kong)]
     end
 
+    %% Application Layer
     subgraph Application Layer
         G --> S1[Backend Core (Go)]
         G --> S2[AI Service (Python)]
         G --> S3[Real-time Service (Go)]
     end
 
+    %% Data & Event Layer
     subgraph Data & Event Layer
-        S1 --> DB1[(PostgreSQL)]
-        S1 --> DB2[(MongoDB)]
-        S2 --> DB3[(Vector DB)]
-        S3 --> DB4[(Redis)]
-        S1 -- Events --> K((Event Bus))
+        S1 --> DB1[PostgreSQL]
+        S1 --> DB2[MongoDB]
+        S2 --> DB3[Vector DB]
+        S3 --> DB4[Redis]
+        S1 -- Events --> K[Event Bus]
         K -- Events --> S2
         K -- Events --> S3
     end
 
+    %% Styles
     style U fill:#fff
     style F fill:#ccf
     style E fill:#f9f
     style G fill:#f9f
     style S1 fill:#cde
     style S2 fill:#cde
-    style S3 fill: #cde
+    style S3 fill:#cde
     style DB1 fill:#fde
     style DB2 fill:#fde
     style DB3 fill:#fde
