@@ -137,7 +137,7 @@ graph LR
 ```mermaid
 graph TD
     subgraph Client Layer
-        U("کاربران") --> F{Frontend (Next.js)}
+        U"کاربران" --> F{"Frontend Next.js"}
     end
 
     subgraph Edge & Gateway Layer
